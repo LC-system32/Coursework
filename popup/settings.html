@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Import Bridge Settings</title>
+  <link rel="stylesheet" href="popup-common.css" />
+  <link rel="stylesheet" href="settings.css" />
+</head>
+<body class="popup-body settings-body">
+  <main class="popup-shell settings-shell">
+    <section class="panel settings-panel">
+      <header class="topbar topbar--settings">
+        <button class="icon-button icon-button--soft" id="backBtn" type="button" aria-label="Назад">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18 9 12l6-6" />
+          </svg>
+        </button>
+
+        <div class="topbar__center">
+          <p class="brand__eyebrow">Schema editor</p>
+          <h1 class="brand__title brand__title--settings">Налаштування</h1>
+        </div>
+
+        <span class="topbar__spacer" aria-hidden="true"></span>
+      </header>
+
+      <section class="settings-screen">
+        <div class="settings-scroll">
+          <section class="settings-transfer-card" aria-label="Імпорт та експорт налаштувань">
+            <div class="settings-transfer-card__copy">
+              <h2 class="settings-transfer-card__title">Перенесення налаштувань між ПК</h2>
+              <p class="settings-transfer-card__text">
+                Експорт створює JSON-файл з поточними налаштуваннями. Імпорт читає вибраний JSON
+                і повністю замінює поточний конфіг.
+              </p>
+            </div>
+
+            <div class="settings-transfer-card__actions">
+              <button class="secondary-button" id="exportSettingsBtn" type="button">Експорт JSON</button>
+              <button class="secondary-button" id="importSettingsBtn" type="button">Імпорт JSON</button>
+              <input id="importSettingsFileInput" type="file" accept="application/json,.json" hidden />
+            </div>
+          </section>
+
+          <section class="settings-picker-card" aria-label="Майстер вибору полів">
+            <div class="settings-picker-card__copy">
+              <h2 class="settings-picker-card__title">Автовибір полів на сторінках</h2>
+              <p class="settings-picker-card__text">
+                Під час режиму вибору наведіть курсор на елемент, дочекайтесь підсвітки,
+                натисніть ліву кнопку миші, щоб додати поле. Натисніть ESC для завершення етапу.
+              </p>
+            </div>
+
+            <button class="secondary-button settings-picker-card__button" id="launchFieldPickerBtn" type="button">
+              Вибрати поля на сторінках
+            </button>
+          </section>
+
+          <section class="settings-grid" aria-label="Колонки налаштувань">
+            <article class="settings-column">
+              <header class="settings-column__head">
+                <span class="settings-column__badge">З сайту</span>
+                <label class="site-input">
+                  <span class="site-input__label">Джерело</span>
+                  <input id="sourceSiteInput" type="text" placeholder="https://source-site.ua" />
+                </label>
+              </header>
+
+              <div class="field-stack" id="sourceFieldsList"></div>
+              <button class="secondary-button field-list-action" id="addSourceFieldBtn" type="button">Додати поле</button>
+            </article>
+
+            <article class="settings-column settings-column--target">
+              <header class="settings-column__head">
+                <span class="settings-column__badge">На сайт</span>
+                <label class="site-input">
+                  <span class="site-input__label">Приймач</span>
+                  <input id="targetSiteInput" type="text" placeholder="https://target-site.ua" />
+                </label>
+              </header>
+
+              <div class="field-stack" id="targetFieldsList"></div>
+              <button class="secondary-button field-list-action" id="addTargetFieldBtn" type="button">Додати поле</button>
+            </article>
+          </section>
+        </div>
+
+        <p class="settings-status" id="settingsStatus" role="status" aria-live="polite">
+          Вкажіть сайти, відредагуйте список полів, імпортуйте/експортуйте конфіг або запустіть автоматичний вибір.
+        </p>
+
+        <div class="settings-actions">
+          <button class="secondary-button" id="cancelSettingsBtn" type="button">Скасувати</button>
+          <button class="primary-button primary-button--compact" id="saveSettingsBtn" type="button">Зберегти</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="popup-common.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>
