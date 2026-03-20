@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="uk">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="popup-common.css" />
   <link rel="stylesheet" href="settings.css" />
 </head>
+
 <body class="popup-body settings-body">
   <main class="popup-shell settings-shell">
     <section class="panel settings-panel">
@@ -29,12 +31,17 @@
         <div class="settings-scroll">
           <section class="settings-transfer-card" aria-label="Імпорт та експорт налаштувань">
             <div class="settings-transfer-card__copy">
-              <h2 class="settings-transfer-card__title">Перенесення налаштувань між ПК</h2>
+              <h2 class="settings-transfer-card__title">Керування конфігурацією</h2>
               <p class="settings-transfer-card__text">
-                Експорт створює JSON-файл з поточними налаштуваннями. Імпорт читає вибраний JSON
-                і повністю замінює поточний конфіг.
+                У цьому розділі виконується налаштування схеми перенесення даних, а також імпорт і експорт конфігурації
+                плагіна. Вибір полів дозволяє встановити відповідність між полями сторінки-джерела та сторінки-приймача.
               </p>
             </div>
+
+            <button class="primary-button settings-transfer-card__actions-picker-card__button" id="launchFieldPickerBtn"
+              type="button">
+              Вибрати поля на сторінках
+            </button>
 
             <div class="settings-transfer-card__actions">
               <button class="secondary-button" id="exportSettingsBtn" type="button">Експорт JSON</button>
@@ -43,19 +50,9 @@
             </div>
           </section>
 
-          <section class="settings-picker-card" aria-label="Майстер вибору полів">
-            <div class="settings-picker-card__copy">
-              <h2 class="settings-picker-card__title">Автовибір полів на сторінках</h2>
-              <p class="settings-picker-card__text">
-                Під час режиму вибору наведіть курсор на елемент, дочекайтесь підсвітки,
-                натисніть ліву кнопку миші, щоб додати поле. Натисніть ESC для завершення етапу.
-              </p>
-            </div>
-
-            <button class="secondary-button settings-picker-card__button" id="launchFieldPickerBtn" type="button">
-              Вибрати поля на сторінках
-            </button>
-          </section>
+          <span style="font-size: 13px; display: flex; width: fit-content; margin: 0 auto 15px;" class="settings-column__badge">
+            Схема конфігурації зіставлення полів джерела та приймача
+          </span>
 
           <section class="settings-grid" aria-label="Колонки налаштувань">
             <article class="settings-column">
@@ -68,7 +65,8 @@
               </header>
 
               <div class="field-stack" id="sourceFieldsList"></div>
-              <button class="secondary-button field-list-action" id="addSourceFieldBtn" type="button">Додати поле</button>
+              <button class="secondary-button field-list-action" id="addSourceFieldBtn" type="button">Додати
+                поле</button>
             </article>
 
             <article class="settings-column settings-column--target">
@@ -81,7 +79,8 @@
               </header>
 
               <div class="field-stack" id="targetFieldsList"></div>
-              <button class="secondary-button field-list-action" id="addTargetFieldBtn" type="button">Додати поле</button>
+              <button class="secondary-button field-list-action" id="addTargetFieldBtn" type="button">Додати
+                поле</button>
             </article>
           </section>
         </div>
@@ -101,4 +100,5 @@
   <script src="popup-common.js"></script>
   <script src="settings.js"></script>
 </body>
+
 </html>

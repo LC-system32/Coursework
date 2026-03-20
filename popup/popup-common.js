@@ -38,8 +38,8 @@ const PopupBridge = (() => {
   function normalizeFieldList(fields) {
     return Array.isArray(fields)
       ? fields
-          .map((value) => typeof value === "string" ? value.trim() : "")
-          .filter(Boolean)
+        .map((value) => typeof value === "string" ? value.trim() : "")
+        .filter(Boolean)
       : [];
   }
 
@@ -111,8 +111,8 @@ const PopupBridge = (() => {
         const label = isFileField
           ? FILE_FIELD_LABEL
           : (typeof item.label === "string" && item.label.trim()
-              ? item.label.trim()
-              : identifierValue || fieldLabel || `Поле ${index + 1}`);
+            ? item.label.trim()
+            : identifierValue || fieldLabel || `Поле ${index + 1}`);
 
         return {
           role,
@@ -475,8 +475,8 @@ const PopupBridge = (() => {
     const createdWindow = await ext.windows.create({
       url: SETTINGS_PAGE_URL,
       type: "popup",
-      width: 980,
-      height: 820,
+      width: 850,
+      height: 700,
       focused: true
     });
 
