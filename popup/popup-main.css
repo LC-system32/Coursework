@@ -8,20 +8,54 @@ body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   min-height: 0;
-  padding-top: 14px;
+  padding-top: 16px;
+}
+
+.flow-card {
+  padding: 12px;
+  border: 1px solid rgba(129, 161, 217, 0.12);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+    rgba(12, 22, 39, 0.72);
 }
 
 .primary-button {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .status-line {
+  display: flex;
+  align-items: flex-start;
   margin: 0;
-  padding: 0 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--success-line);
+  border-radius: 15px;
+  background:
+    linear-gradient(180deg, rgba(0, 214, 201, 0.06), rgba(255, 255, 255, 0)),
+    var(--success-soft);
 }
 
 .bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   margin-top: auto;
+}
+
+@media (max-width: 440px) {
+  html,
+  body {
+    width: 400px;
+  }
+
+  .site-card__value {
+    font-size: 14px;
+  }
+
+  .brand__title {
+    font-size: 20px;
+  }
 }
