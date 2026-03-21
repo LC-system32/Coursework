@@ -1,11 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Data Import Bridge",
-  "version": "1.2.0",
+  "version": "1.0",
   "description": "Імпортування даних між системою верифікації робіт та StrikePlagiarism через popup-вікно налаштувань.",
   "homepage_url": "https://fotius.cdu.edu.ua/",
+  "icons": {
+    "32": "favicon.svg"
+  },
   "developer": {
-    "name": "Ilya",
+    "name": "Alex",
     "url": "https://fotius.cdu.edu.ua/"
   },
   "permissions": [
@@ -20,6 +23,15 @@
   ],
   "background": {
     "scripts": [
+      "background/background-constants.js",
+      "background/background-debug-service.js",
+      "background/background-tab-service.js",
+      "background/background-picker-session-service.js",
+      "background/background-file-service.js",
+      "background/background-import-flow-service.js",
+      "background/background-picker-message-service.js",
+      "background/background-message-router-service.js",
+      "background/background-command-service.js",
       "background.js"
     ]
   },
@@ -34,6 +46,13 @@
         "https://*/*"
       ],
       "js": [
+        "content/content-constants.js",
+        "content/content-toast-service.js",
+        "content/content-picker-dom-service.js",
+        "content/content-picker-session-service.js",
+        "content/content-form-io-service.js",
+        "content/content-file-transfer-service.js",
+        "content/content-import-flow-service.js",
         "content/content.js"
       ],
       "run_at": "document_idle"
@@ -43,8 +62,19 @@
     "gecko": {
       "id": "data-import-bridge@vu.cdu.edu.ua",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
+    }
+  },
+  "commands": {
+    "run-direct-import": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Запустити імпорт даних"
     }
   }
 }
