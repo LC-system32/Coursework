@@ -56,3 +56,72 @@ let pickerState = {
   sessionId: "",
   hoverElement: null
 };
+
+let extensionContextInvalidated = false;
+let extensionReloadToastShown = false;
+
+function isExtensionContextInvalidatedError(error) {
+  const message = String(error?.message || error || "");
+  return message.includes("Extension context invalidated")
+    || message.includes("Receiving end does not exist")
+    || message.includes("message port closed")
+    || message.includes("context invalidated");
+}
+
+function handleInvalidatedExtensionContext(error) {
+  if (!isExtensionContextInvalidatedError(error)) {
+    return false;
+  }
+
+  extensionContextInvalidated = true;
+  console.warn(
+    "Data Import Bridge: extension context invalidated. Refresh this tab after reloading or updating the extension.",
+    error
+  );
+
+  if (!extensionReloadToastShown && typeof showToast === "function") {
+    extensionReloadToastShown = true;
+    showToast(
+      "Розширення було оновлено або перезавантажено. Оновіть цю вкладку, щоб продовжити роботу.",
+      "info",
+      6200
+    );
+  }
+
+  return true;
+}
+
+async function safeStorageLocalGet(key, fallbackValue = null) {
+  try {
+    const data = await ext.storage.local.get(key);
+    return data?.[key] ?? fallbackValue;
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return fallbackValue;
+    }
+    throw error;
+  }
+}
+
+async function safeStorageLocalSet(payload) {
+  try {
+    await ext.storage.local.set(payload);
+    return { ok: true };
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return { ok: false, invalidated: true, message: "extension-context-invalidated" };
+    }
+    throw error;
+  }
+}
+
+async function safeRuntimeSendMessage(message) {
+  try {
+    return await ext.runtime.sendMessage(message);
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return { ok: false, invalidated: true, message: "extension-context-invalidated" };
+    }
+    throw error;
+  }
+}

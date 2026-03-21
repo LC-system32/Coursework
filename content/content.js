@@ -41,16 +41,28 @@ document.addEventListener("keydown", async (event) => {
 }, true);
 
 window.addEventListener("focus", () => {
-  syncPickerMode();
+  syncPickerMode().catch((error) => {
+    if (!handleInvalidatedExtensionContext(error)) {
+      console.error("PICKER_MODE_SYNC_ERROR", error);
+    }
+  });
 });
 
 document.addEventListener("visibilitychange", () => {
-  syncPickerMode();
+  syncPickerMode().catch((error) => {
+    if (!handleInvalidatedExtensionContext(error)) {
+      console.error("PICKER_MODE_SYNC_ERROR", error);
+    }
+  });
 });
 
 ext.storage?.onChanged?.addListener((changes, areaName) => {
   if (areaName === "local" && changes[PICKER_SESSION_KEY]) {
-    syncPickerMode();
+    syncPickerMode().catch((error) => {
+      if (!handleInvalidatedExtensionContext(error)) {
+        console.error("PICKER_MODE_SYNC_ERROR", error);
+      }
+    });
   }
 });
 
@@ -65,9 +77,17 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      await ext.storage.local.set({
+      const saveResult = await safeStorageLocalSet({
         [IMPORT_PAYLOAD_KEY]: collectResult.payload
       });
+
+      if (saveResult?.invalidated) {
+        sendResponse({
+          ok: false,
+          message: "Розширення було перезавантажено. Оновіть вкладку й повторіть імпорт."
+        });
+        return;
+      }
 
       sendResponse(collectResult);
       return;
@@ -104,4 +124,8 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-syncPickerMode();
+syncPickerMode().catch((error) => {
+  if (!handleInvalidatedExtensionContext(error)) {
+    console.error("PICKER_MODE_SYNC_ERROR", error);
+  }
+});

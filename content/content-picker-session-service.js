@@ -1,6 +1,5 @@
 async function getStoredValue(key) {
-  const data = await ext.storage.local.get(key);
-  return data?.[key];
+  return await safeStorageLocalGet(key, null);
 }
 
 async function getPickerSession() {
@@ -36,6 +35,11 @@ function enablePickerMode(session) {
 async function syncPickerMode() {
   const session = await getPickerSession();
 
+  if (extensionContextInvalidated) {
+    disablePickerMode();
+    return;
+  }
+
   if (!session?.active || session.awaitingResolution || document.hidden) {
     disablePickerMode();
     return;
@@ -59,14 +63,14 @@ async function selectField(candidate) {
   }
 
   try {
-    const response = await ext.runtime.sendMessage({
+    const response = await safeRuntimeSendMessage({
       type: "PICKER_SELECT_FIELD",
       entry,
       pageUrl: location.href
     });
 
     if (!response?.ok) {
-      showToast(response?.error || "Поле не вдалося додати.", "error");
+      showToast(response?.error || response?.message || "Поле не вдалося додати.", "error");
       return;
     }
 
@@ -84,7 +88,7 @@ async function selectField(candidate) {
 
 async function finishPickerPhase() {
   try {
-    const response = await ext.runtime.sendMessage({
+    const response = await safeRuntimeSendMessage({
       type: "PICKER_FINISH_PHASE",
       pageUrl: location.href
     });
@@ -111,13 +115,13 @@ async function finishPickerPhase() {
         "Натисніть OK, щоб обрізати зайві поля, або Скасувати, щоб почати вибір спочатку."
       );
 
-      const resolution = await ext.runtime.sendMessage({
+      const resolution = await safeRuntimeSendMessage({
         type: "PICKER_RESOLVE_MISMATCH",
         action: trimExtra ? "trim" : "restart"
       });
 
       if (!resolution?.ok) {
-        showToast(resolution?.error || "Не вдалося завершити конфлікт кількості полів.", "error");
+        showToast(resolution?.error || resolution?.message || "Не вдалося завершити конфлікт кількості полів.", "error");
         return;
       }
 
@@ -136,7 +140,7 @@ async function finishPickerPhase() {
       return;
     }
 
-    showToast(response?.error || "Етап вибору не вдалося завершити.", "error");
+    showToast(response?.error || response?.message || "Етап вибору не вдалося завершити.", "error");
   } catch {
     showToast("Помилка під час завершення поточного етапу вибору.", "error");
   }

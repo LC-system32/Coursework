@@ -148,3 +148,71 @@ async function prepareTargetTab(siteUrl) {
 
   return createdTab;
 }
+
+
+function isHttpTabUrl(value) {
+  return /^https?:\/\//i.test(String(value || ""));
+}
+
+function isStrikePlagiarismUrl(value) {
+  try {
+    return new URL(value).hostname === "panel.strikeplagiarism.com";
+  } catch {
+    return false;
+  }
+}
+
+async function getConfigSitesForReload() {
+  try {
+    const stored = await EXT.storage.local.get(POPUP_CONFIG_STORAGE_KEY);
+    const config = stored?.[POPUP_CONFIG_STORAGE_KEY];
+    const sites = new Set();
+
+    const sourceSite = normalizeUrl(config?.sourceSite || "");
+    const targetSite = normalizeUrl(config?.targetSite || "");
+
+    if (sourceSite) {
+      sites.add(sourceSite);
+    }
+
+    if (targetSite) {
+      sites.add(targetSite);
+    }
+
+    return [...sites];
+  } catch {
+    return [];
+  }
+}
+
+async function reloadTabsAfterExtensionUpdate() {
+  const tabs = await EXT.tabs.query({});
+  const configSites = await getConfigSitesForReload();
+
+  for (const tab of tabs) {
+    if (!tab?.id || !isHttpTabUrl(tab.url)) {
+      continue;
+    }
+
+    const matchesConfiguredSite = configSites.some((siteUrl) => sameSite(tab.url, siteUrl));
+    const shouldReload = matchesConfiguredSite || isStrikePlagiarismUrl(tab.url);
+
+    if (!shouldReload) {
+      continue;
+    }
+
+    try {
+      await EXT.tabs.reload(tab.id);
+      await writeDebug("tab-reloaded-after-extension-update", {
+        tabId: tab.id,
+        url: tab.url
+      });
+    } catch (error) {
+      await writeDebug("tab-reload-after-extension-update-error", {
+        tabId: tab.id,
+        url: tab.url,
+        message: String(error?.message || error)
+      });
+    }
+  }
+}

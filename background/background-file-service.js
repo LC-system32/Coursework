@@ -125,18 +125,16 @@ function parseFileNameFromDisposition(value) {
 }
 
 async function blobToBase64(blob) {
-  return await new Promise((resolve, reject) => {
-    const reader = new FileReader();
+  const arrayBuffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = "";
 
-    reader.onload = () => {
-      const result = String(reader.result || "");
-      const commaIndex = result.indexOf(",");
-      resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
-    };
+  for (let index = 0; index < bytes.length; index += 0x8000) {
+    const chunk = bytes.subarray(index, index + 0x8000);
+    binary += String.fromCharCode(...chunk);
+  }
 
-    reader.onerror = () => reject(reader.error || new Error("blob-to-base64-failed"));
-    reader.readAsDataURL(blob);
-  });
+  return btoa(binary);
 }
 
 function decodeDriveDownloadUrl(rawUrl) {

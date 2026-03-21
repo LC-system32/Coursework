@@ -42,7 +42,7 @@ function base64ToFile(base64, fileName, mimeType) {
 }
 
 async function fetchFileFromBackground(fileRef) {
-  const download = await ext.runtime.sendMessage({
+  const download = await safeRuntimeSendMessage({
     type: "DOWNLOAD_IMPORT_FILE",
     fileRef
   });
@@ -54,14 +54,14 @@ async function fetchFileFromBackground(fileRef) {
   let base64 = "";
 
   for (let chunkIndex = 0; chunkIndex < download.chunkCount; chunkIndex += 1) {
-    const chunkResponse = await ext.runtime.sendMessage({
+    const chunkResponse = await safeRuntimeSendMessage({
       type: "GET_IMPORTED_FILE_CHUNK",
       cacheKey: download.cacheKey,
       chunkIndex
     });
 
     if (!chunkResponse?.ok) {
-      await ext.runtime.sendMessage({
+      await safeRuntimeSendMessage({
         type: "CLEAR_IMPORTED_FILE_CACHE",
         cacheKey: download.cacheKey
       });
@@ -71,7 +71,7 @@ async function fetchFileFromBackground(fileRef) {
     base64 += chunkResponse.chunk || "";
   }
 
-  await ext.runtime.sendMessage({
+  await safeRuntimeSendMessage({
     type: "CLEAR_IMPORTED_FILE_CACHE",
     cacheKey: download.cacheKey
   });
@@ -259,7 +259,6 @@ function attachFileToInput(input, file) {
 
   try {
     input.focus();
-    input.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
   } catch { }
 
   try {
@@ -509,10 +508,6 @@ async function uploadImportedFileToTarget(targetElement, file) {
 
     const dropCandidates = getDropZoneCandidates(currentTarget || document.body);
     for (const dropCandidate of dropCandidates) {
-      try {
-        dropCandidate.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-      } catch { }
-
       const dropped = dispatchDropWithFile(dropCandidate, file);
       if (!dropped) {
         continue;
