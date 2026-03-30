@@ -1,14 +1,11 @@
-openSettingsBtn.addEventListener("click", () => {
-  handleOpenSettingsClick();
-});
+const { createApp } = Vue;
 
-importBtn.addEventListener("click", () => {
-  handleImportButtonClick();
-});
-
-registerPopupRuntimeMessages();
-
-initPopup().catch((error) => {
-  console.error("POPUP_INIT_ERROR", error);
-  setStatus("Не вдалося завантажити налаштування.");
-});
+createApp({
+  data() {
+    return {
+      title: "Vue у розширенні працює",
+      message: "Це окрема тестова сторінка без втручання в існуючий popup.",
+      count: 0
+    };
+  }
+}).mount("#app");

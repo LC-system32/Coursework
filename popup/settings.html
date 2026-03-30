@@ -1,119 +1,154 @@
 <!doctype html>
-<html lang="uk">
-
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Import Bridge Settings</title>
-  <link rel="stylesheet" href="popup-common.css" />
-  <link rel="stylesheet" href="settings.css" />
+  <title>Настройки Data Import Bridge</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #f7f7f9;
+      color: #222;
+    }
+
+    .wrap {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .map-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .danger {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .status {
+      margin-top: 16px;
+      padding: 10px 12px;
+      background: #eef2ff;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+  </style>
 </head>
+<body>
+  <div id="app" class="wrap">
+    <div class="card">
+      <h1>Настройки</h1>
 
-<body class="popup-body settings-body">
-  <main class="popup-shell settings-shell">
-    <section class="panel settings-panel">
-      <header class="topbar topbar--settings">
-        <button class="icon-button icon-button--soft" id="backBtn" type="button" aria-label="Назад">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 18 9 12l6-6" />
-          </svg>
-        </button>
+      <div class="field">
+        <label for="sourceSite">Сайт-источник</label>
+        <input id="sourceSite" v-model="sourceSite" type="text" placeholder="https://source-site.com" />
+      </div>
 
-        <div class="topbar__center">
-          <p class="brand__eyebrow">Schema editor</p>
-          <h1 class="brand__title brand__title--settings">Налаштування</h1>
+      <div class="field">
+        <label for="targetSite">Сайт-приёмник</label>
+        <input id="targetSite" v-model="targetSite" type="text" placeholder="https://target-site.com" />
+      </div>
+
+      <div class="field">
+        <label>Сопоставление полей</label>
+
+        <div
+          class="map-row"
+          v-for="(item, index) in fieldMappings"
+          :key="index"
+        >
+          <input
+            v-model="item.source"
+            type="text"
+            placeholder="Поле источника (id или name)"
+          />
+
+          <input
+            v-model="item.target"
+            type="text"
+            placeholder="Поле приёмника (id или name)"
+          />
+
+          <button class="danger" @click="removeMapping(index)">Удалить</button>
         </div>
 
-        <span class="topbar__spacer" aria-hidden="true"></span>
-      </header>
+        <button class="secondary" @click="addMapping">Добавить пару</button>
+      </div>
 
-      <section class="settings-screen">
-        <div class="settings-scroll">
-          <section class="settings-transfer-card" aria-label="Імпорт та експорт налаштувань">
-            <div class="settings-transfer-card__copy">
-              <h2 class="settings-transfer-card__title">Керування конфігурацією</h2>
-              <p class="settings-transfer-card__text">
-                У цьому розділі виконується налаштування схеми перенесення даних, а також імпорт і експорт конфігурації
-                плагіна. Вибір полів дозволяє встановити відповідність між полями сторінки-джерела та сторінки-приймача.
-              </p>
-            </div>
+      <div class="actions">
+        <button class="primary" @click="saveSettings">Сохранить</button>
+        <button class="secondary" @click="resetSettings">Сбросить</button>
+      </div>
 
-            <button class="primary-button settings-transfer-card__actions-picker-card__button" id="launchFieldPickerBtn"
-              type="button">
-              Вибрати поля на сторінках
-            </button>
+      <div v-if="statusMessage" class="status">
+        {{ statusMessage }}
+      </div>
+    </div>
+  </div>
 
-            <div class="settings-transfer-card__actions">
-              <button class="secondary-button" id="exportSettingsBtn" type="button">Експорт JSON</button>
-              <button class="secondary-button" id="importSettingsBtn" type="button">Імпорт JSON</button>
-              <input id="importSettingsFileInput" type="file" accept="application/json,.json" hidden />
-            </div>
-          </section>
-
-          <span style="font-size: 13px; display: flex; width: fit-content; margin: 0 auto 15px;"
-            class="settings-column__badge">
-            Схема конфігурації зіставлення полів джерела та приймача
-          </span>
-
-          <section class="settings-grid" aria-label="Колонки налаштувань">
-            <article class="settings-column">
-              <header class="settings-column__head">
-                <span class="settings-column__badge">З сайту</span>
-                <label class="site-input">
-                  <span class="site-input__label">Джерело</span>
-                  <input id="sourceSiteInput" type="text" placeholder="https://source-site.ua" />
-                </label>
-              </header>
-
-              <div class="field-stack" id="sourceFieldsList"></div>
-              <button class="secondary-button field-list-action" id="addSourceFieldBtn" type="button">Додати
-                поле</button>
-            </article>
-
-            <article class="settings-column settings-column--target">
-              <header class="settings-column__head">
-                <span class="settings-column__badge">На сайт</span>
-                <label class="site-input">
-                  <span class="site-input__label">Приймач</span>
-                  <input id="targetSiteInput" type="text" placeholder="https://target-site.ua" />
-                </label>
-              </header>
-
-              <div class="field-stack" id="targetFieldsList"></div>
-              <button class="secondary-button field-list-action" id="addTargetFieldBtn" type="button">Додати
-                поле</button>
-            </article>
-          </section>
-        </div>
-
-        <p class="settings-status" id="settingsStatus" role="status" aria-live="polite">
-          Вкажіть сайти, відредагуйте список полів, імпортуйте/експортуйте конфіг або запустіть автоматичний вибір.
-        </p>
-
-        <div class="settings-actions">
-          <button class="secondary-button" id="cancelSettingsBtn" type="button">Скасувати</button>
-          <button class="primary-button primary-button--compact" id="saveSettingsBtn" type="button">Зберегти</button>
-        </div>
-      </section>
-    </section>
-  </main>
-
-  <script src="common/popup-bridge-state.js"></script>
-  <script src="common/popup-config-service.js"></script>
-  <script src="common/popup-browser-tab-service.js"></script>
-  <script src="common/popup-window-service.js"></script>
-  <script src="common/popup-flash-service.js"></script>
-  <script src="common/popup-toast-service.js"></script>
-  <script src="popup-common.js"></script>
-  <script src="settings/settings-state.js"></script>
-  <script src="settings/settings-mapping-service.js"></script>
-  <script src="settings/settings-view-service.js"></script>
-  <script src="settings/settings-workflow-service.js"></script>
-  <script src="settings/settings-transfer-service.js"></script>
-  <script src="settings/settings-picker-launch-service.js"></script>
-  <script src="settings/settings-runtime-message-service.js"></script>
-  <script src="settings/settings-event-binding-service.js"></script>
+  <script src="../vendor/vue.global.prod.js"></script>
   <script src="settings.js"></script>
 </body>
-
 </html>
