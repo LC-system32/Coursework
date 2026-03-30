@@ -1,23 +1,81 @@
 const PICKER_RESULT_KEY = "data-import-field-picker-result";
-const backBtn = document.getElementById("backBtn");
-const cancelSettingsBtn = document.getElementById("cancelSettingsBtn");
-const saveSettingsBtn = document.getElementById("saveSettingsBtn");
-const launchFieldPickerBtn = document.getElementById("launchFieldPickerBtn");
-const addSourceFieldBtn = document.getElementById("addSourceFieldBtn");
-const addTargetFieldBtn = document.getElementById("addTargetFieldBtn");
-const exportSettingsBtn = document.getElementById("exportSettingsBtn");
-const importSettingsBtn = document.getElementById("importSettingsBtn");
-const importSettingsFileInput = document.getElementById("importSettingsFileInput");
-const settingsStatusEl = document.getElementById("settingsStatus");
 
-const sourceSiteInput = document.getElementById("sourceSiteInput");
-const targetSiteInput = document.getElementById("targetSiteInput");
-const sourceFieldsList = document.getElementById("sourceFieldsList");
-const targetFieldsList = document.getElementById("targetFieldsList");
+const settingsUiDefaults = {
+  sourceSite: "",
+  targetSite: "",
+  statusMessage: "Вкажіть сайти, відредагуйте список полів, імпортуйте/експортуйте конфіг або запустіть автоматичний вибір.",
+  sourceMappings: [],
+  targetMappings: [],
+  launchFieldPickerDisabled: false
+};
+
+let settingsUiState = settingsUiDefaults;
+let sourceSiteInputElement = null;
+let autoSaveTimer = null;
+
+const backBtn = null;
+const cancelSettingsBtn = null;
+const saveSettingsBtn = null;
+const addSourceFieldBtn = null;
+const addTargetFieldBtn = null;
+const exportSettingsBtn = null;
+const importSettingsBtn = null;
+const sourceFieldsList = null;
+const targetFieldsList = null;
+
+function setSettingsUiStateProxy(proxy) {
+  settingsUiState = proxy || settingsUiDefaults;
+}
+
+function setSourceSiteInputElement(element) {
+  sourceSiteInputElement = element || null;
+}
+
+const launchFieldPickerBtn = {
+  get disabled() {
+    return Boolean(settingsUiState.launchFieldPickerDisabled);
+  },
+  set disabled(value) {
+    settingsUiState.launchFieldPickerDisabled = Boolean(value);
+  }
+};
+
+const settingsStatusEl = {
+  get textContent() {
+    return settingsUiState.statusMessage;
+  },
+  set textContent(value) {
+    settingsUiState.statusMessage = String(value || "");
+  }
+};
+
+const sourceSiteInput = {
+  get value() {
+    return settingsUiState.sourceSite;
+  },
+  set value(value) {
+    settingsUiState.sourceSite = String(value || "");
+  },
+  focus() {
+    sourceSiteInputElement?.focus?.();
+  }
+};
+
+const targetSiteInput = {
+  get value() {
+    return settingsUiState.targetSite;
+  },
+  set value(value) {
+    settingsUiState.targetSite = String(value || "");
+  }
+};
+
+const importSettingsFileInput = {
+  value: "",
+  click() {}
+};
 
 let fieldMappingsState = {
   source: [],
   target: []
 };
-
-let autoSaveTimer = null;

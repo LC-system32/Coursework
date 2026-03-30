@@ -1,18 +1,32 @@
 <!doctype html>
 <html lang="uk">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vue Test</title>
+  <title>Data Import Bridge</title>
+  <link rel="stylesheet" href="popup-common.css" />
+  <link rel="stylesheet" href="popup-main.css" />
 </head>
-<body>
-  <div id="app">
-    <h1>{{ title }}</h1>
-    <p>{{ message }}</p>
-    <button @click="count++">Натиснуто: {{ count }}</button>
-  </div>
 
-  <script src="../node_modules/vue/dist/vue.global.js"></script>
+<body class="popup-body">
+  <div id="popupAppRoot"></div>
+
+  <script src="../node_modules/vue/dist/vue.runtime.global.prod.js"></script>
+  <script src="common/popup-bridge-state.js"></script>
+  <script src="common/popup-config-service.js"></script>
+  <script src="common/popup-browser-tab-service.js"></script>
+  <script src="common/popup-window-service.js"></script>
+  <script src="common/popup-flash-service.js"></script>
+  <script src="common/popup-toast-service.js"></script>
+  <script src="popup-common.js"></script>
+  <script src="main/popup-main-state.js"></script>
+  <script src="main/popup-main-validation.js"></script>
+  <script src="main/popup-main-shortcut-service.js"></script>
+  <script src="main/popup-main-workflow-service.js"></script>
+  <script src="main/popup-main-import-service.js"></script>
+  <script src="main/popup-main-runtime-message-service.js"></script>
   <script src="popup-main.js"></script>
 </body>
+
 </html>
