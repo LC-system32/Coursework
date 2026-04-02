@@ -33,6 +33,41 @@ function sameSite(tabUrl, wantedUrl) {
   }
 }
 
+
+function matchesConfiguredSiteInBackground(tabUrl, siteUrl) {
+  try {
+    const tab = new URL(tabUrl);
+    const site = new URL(normalizeUrl(siteUrl));
+
+    if (tab.origin !== site.origin) {
+      return false;
+    }
+
+    const sitePath = site.pathname === "/" ? "" : site.pathname.replace(/\/+$/, "");
+    return !sitePath || tab.pathname.startsWith(sitePath);
+  } catch {
+    return false;
+  }
+}
+
+async function findOpenTabByConfiguredSite(siteUrl) {
+  const normalizedSite = normalizeUrl(siteUrl);
+
+  if (!normalizedSite) {
+    return null;
+  }
+
+  const tabs = await EXT.tabs.query({});
+  const matchingTabs = tabs.filter((tab) => tab.id && tab.url && matchesConfiguredSiteInBackground(tab.url, normalizedSite));
+
+  if (!matchingTabs.length) {
+    return null;
+  }
+
+  const activeMatch = matchingTabs.find((tab) => tab.active);
+  return activeMatch || matchingTabs[0];
+}
+
 async function notifyExtension(message) {
   try {
     await EXT.runtime.sendMessage(message);

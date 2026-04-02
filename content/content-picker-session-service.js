@@ -1,6 +1,32 @@
+function isExtensionContextInvalidatedError(error) {
+  const message = String(error?.message || error || "");
+  return (
+    message.includes("Extension context invalidated") ||
+    message.includes("context invalidated") ||
+    message.includes("Receiving end does not exist") ||
+    message.includes("The message port closed before a response was received")
+  );
+}
+
+function handleInvalidatedExtensionContext(error) {
+  if (!isExtensionContextInvalidatedError(error)) {
+    return false;
+  }
+
+  disablePickerMode();
+  return true;
+}
+
 async function getStoredValue(key) {
-  const data = await ext.storage.local.get(key);
-  return data?.[key];
+  try {
+    const data = await ext.storage.local.get(key);
+    return data?.[key];
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return undefined;
+    }
+    throw error;
+  }
 }
 
 async function getPickerSession() {
@@ -34,19 +60,39 @@ function enablePickerMode(session) {
 }
 
 async function syncPickerMode() {
-  const session = await getPickerSession();
+  try {
+    const session = await getPickerSession();
 
-  if (!session?.active || session.awaitingResolution || document.hidden) {
+    if (!session?.active || session.awaitingResolution || document.hidden) {
+      disablePickerMode();
+      return;
+    }
+
+    const site = session.phase === "target" ? session.targetSite : session.sourceSite;
+
+    if (matchesSite(location.href, site)) {
+      enablePickerMode(session);
+    } else {
+      disablePickerMode();
+    }
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return;
+    }
+
+    console.error("SYNC_PICKER_MODE_ERROR", error);
     disablePickerMode();
-    return;
   }
+}
 
-  const site = session.phase === "target" ? session.targetSite : session.sourceSite;
-
-  if (matchesSite(location.href, site)) {
-    enablePickerMode(session);
-  } else {
-    disablePickerMode();
+async function safeSendRuntimeMessage(payload) {
+  try {
+    return await ext.runtime.sendMessage(payload);
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return { ok: false, invalidated: true };
+    }
+    throw error;
   }
 }
 
@@ -59,11 +105,15 @@ async function selectField(candidate) {
   }
 
   try {
-    const response = await ext.runtime.sendMessage({
+    const response = await safeSendRuntimeMessage({
       type: "PICKER_SELECT_FIELD",
       entry,
       pageUrl: location.href
     });
+
+    if (response?.invalidated) {
+      return;
+    }
 
     if (!response?.ok) {
       showToast(response?.error || "Поле не вдалося додати.", "error");
@@ -77,17 +127,25 @@ async function selectField(candidate) {
         : `Поле додано. Поточна кількість: ${response.count}.`,
       "success"
     );
-  } catch {
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return;
+    }
+
     showToast("Помилка під час збереження поля у схемі.", "error");
   }
 }
 
 async function finishPickerPhase() {
   try {
-    const response = await ext.runtime.sendMessage({
+    const response = await safeSendRuntimeMessage({
       type: "PICKER_FINISH_PHASE",
       pageUrl: location.href
     });
+
+    if (response?.invalidated) {
+      return;
+    }
 
     if (response?.ok && response.nextPhase === "target") {
       disablePickerMode();
@@ -111,10 +169,14 @@ async function finishPickerPhase() {
         "Натисніть OK, щоб обрізати зайві поля, або Скасувати, щоб почати вибір спочатку."
       );
 
-      const resolution = await ext.runtime.sendMessage({
+      const resolution = await safeSendRuntimeMessage({
         type: "PICKER_RESOLVE_MISMATCH",
         action: trimExtra ? "trim" : "restart"
       });
+
+      if (resolution?.invalidated) {
+        return;
+      }
 
       if (!resolution?.ok) {
         showToast(resolution?.error || "Не вдалося завершити конфлікт кількості полів.", "error");
@@ -137,7 +199,11 @@ async function finishPickerPhase() {
     }
 
     showToast(response?.error || "Етап вибору не вдалося завершити.", "error");
-  } catch {
+  } catch (error) {
+    if (handleInvalidatedExtensionContext(error)) {
+      return;
+    }
+
     showToast("Помилка під час завершення поточного етапу вибору.", "error");
   }
 }

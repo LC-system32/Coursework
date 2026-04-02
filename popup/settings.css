@@ -1,0 +1,218 @@
+html,
+body {
+  min-height: 100%;
+}
+
+body.settings-body {
+  min-height: 70vh;
+  overflow: auto;
+}
+
+.settings-shell {
+  max-width: 1160px;
+  min-height: calc(100vh - 40px);
+  margin: 0 auto;
+}
+
+.settings-panel {
+  min-height: calc(100vh - 40px);
+  height: auto;
+}
+
+.settings-screen {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding-top: 16px;
+}
+
+.settings-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.settings-intro,
+.settings-picker-card,
+.settings-transfer-card {
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #fbfdff 0%, #f3f8fe 100%);
+}
+
+.settings-intro {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+}
+
+.settings-intro__text,
+.settings-status,
+.settings-picker-card__text,
+.settings-transfer-card__text {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.settings-transfer-card,
+.settings-picker-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 18px;
+}
+
+.settings-transfer-card__copy,
+.settings-picker-card__copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-transfer-card__title,
+.settings-picker-card__title {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--text-main);
+}
+
+.settings-transfer-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  align-self: stretch;
+}
+
+.settings-transfer-card__actions .secondary-button {
+  width: 100%;
+  height: 100%;
+}
+
+.settings-picker-card__button {
+  width: 100%;
+  max-width: 420px;
+  align-self: stretch;
+  border: 1px solid rgba(38, 120, 205, 0.18);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.settings-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 100%;
+  padding: 18px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+}
+
+.settings-column__head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-column__badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #fff;
+  font-size: 12px;
+  background: linear-gradient(90deg, var(--nav-a) 0%, var(--nav-b) 54%, var(--nav-c) 100%);
+}
+
+.field-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: 10px;
+  align-items: end;
+}
+
+.field-row .field-card {
+  margin: 0;
+}
+
+.field-remove-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--card-line);
+  border-radius: 12px;
+  background: #f6f9fd;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.field-remove-button:hover {
+  background: #eef4fb;
+}
+
+.field-list-action {
+  width: 100%;
+  border: 1px dashed rgba(38, 120, 205, 0.3);
+  background: #f8fbff;
+}
+
+.settings-status {
+  min-height: 24px;
+  padding: 0 2px;
+}
+
+.settings-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.settings-actions .secondary-button,
+.settings-actions .primary-button {
+  width: 100%;
+}
+
+@media (max-width: 920px) {
+
+  .settings-picker-card,
+  .settings-transfer-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings-transfer-card__actions {
+    max-width: none;
+    width: 100%;
+  }
+
+  .settings-picker-card__button {
+    width: 100%;
+    max-width: none;
+  }
+
+  .settings-grid {
+    grid-template-columns: fr;
+  }
+}

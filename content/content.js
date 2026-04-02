@@ -1,3 +1,29 @@
+function syncPickerModeSafe() {
+  syncPickerMode().catch((error) => {
+    if (
+      typeof handleInvalidatedExtensionContext === "function" &&
+      handleInvalidatedExtensionContext(error)
+    ) {
+      return;
+    }
+
+    console.error("SYNC_PICKER_MODE_SAFE_ERROR", error);
+  });
+}
+
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event?.reason;
+  if (
+    typeof isExtensionContextInvalidatedError === "function" &&
+    isExtensionContextInvalidatedError(reason)
+  ) {
+    event.preventDefault();
+    if (typeof handleInvalidatedExtensionContext === "function") {
+      handleInvalidatedExtensionContext(reason);
+    }
+  }
+});
+
 document.addEventListener("mousemove", (event) => {
   if (!pickerState.active) {
     return;
@@ -41,16 +67,16 @@ document.addEventListener("keydown", async (event) => {
 }, true);
 
 window.addEventListener("focus", () => {
-  syncPickerMode();
+  syncPickerModeSafe();
 });
 
 document.addEventListener("visibilitychange", () => {
-  syncPickerMode();
+  syncPickerModeSafe();
 });
 
 ext.storage?.onChanged?.addListener((changes, areaName) => {
   if (areaName === "local" && changes[PICKER_SESSION_KEY]) {
-    syncPickerMode();
+    syncPickerModeSafe();
   }
 });
 
@@ -70,9 +96,23 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      await ext.storage.local.set({
-        [IMPORT_PAYLOAD_KEY]: collectResult.payload
-      });
+      try {
+        await ext.storage.local.set({
+          [IMPORT_PAYLOAD_KEY]: collectResult.payload
+        });
+      } catch (error) {
+        if (
+          typeof handleInvalidatedExtensionContext === "function" &&
+          handleInvalidatedExtensionContext(error)
+        ) {
+          sendResponse({
+            ok: false,
+            message: "Контекст розширення було оновлено. Перезавантажте сторінку і повторіть спробу."
+          });
+          return;
+        }
+        throw error;
+      }
 
       sendResponse(collectResult);
       return;
@@ -102,6 +142,17 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     sendResponse({ ok: false, reason: "unknown-message" });
   })().catch((error) => {
+    if (
+      typeof handleInvalidatedExtensionContext === "function" &&
+      handleInvalidatedExtensionContext(error)
+    ) {
+      sendResponse({
+        ok: false,
+        message: "Контекст розширення було оновлено. Перезавантажте сторінку і повторіть спробу."
+      });
+      return;
+    }
+
     console.error("CONTENT_MESSAGE_ERROR", error);
     sendResponse({ ok: false, message: String(error?.message || error) });
   });
@@ -109,4 +160,4 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-syncPickerMode();
+syncPickerModeSafe();

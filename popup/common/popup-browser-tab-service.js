@@ -146,6 +146,24 @@ async function getSourceTabForPicker() {
 
 
 
+async function getSourceTabForImport(siteUrl) {
+  const matchedTab = await findOpenTabBySite(siteUrl);
+
+  if (matchedTab && isUsableBrowserTab(matchedTab)) {
+    await ext.storage.local.set({ [LAST_BROWSER_TAB_KEY]: matchedTab.id });
+    return matchedTab;
+  }
+
+  const activeTab = await getActiveTab();
+
+  if (isUsableBrowserTab(activeTab) && matchesConfiguredSite(activeTab.url, siteUrl)) {
+    await ext.storage.local.set({ [LAST_BROWSER_TAB_KEY]: activeTab.id });
+    return activeTab;
+  }
+
+  return null;
+}
+
 function formatShortcutForDisplay(shortcut) {
   const raw = String(shortcut || "").trim();
 

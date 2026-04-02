@@ -5,11 +5,10 @@
   "description": "Імпортування даних між системою верифікації робіт та StrikePlagiarism через popup-вікно налаштувань.",
   "homepage_url": "https://fotius.cdu.edu.ua/",
   "icons": {
-    "32": "favicon.svg"
-  },
-  "developer": {
-    "name": "Alex",
-    "url": "https://fotius.cdu.edu.ua/"
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "permissions": [
     "activeTab",
@@ -22,18 +21,7 @@
     "https://*/*"
   ],
   "background": {
-    "scripts": [
-      "background/background-constants.js",
-      "background/background-debug-service.js",
-      "background/background-tab-service.js",
-      "background/background-picker-session-service.js",
-      "background/background-file-service.js",
-      "background/background-import-flow-service.js",
-      "background/background-picker-message-service.js",
-      "background/background-message-router-service.js",
-      "background/background-command-service.js",
-      "background.js"
-    ]
+    "service_worker": "background-sw.js"
   },
   "action": {
     "default_title": "Data Import Bridge",
@@ -58,16 +46,6 @@
       "run_at": "document_idle"
     }
   ],
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "alehamartinenko75@gmail.com",
-      "data_collection_permissions": {
-        "required": [
-          "none"
-        ]
-      }
-    }
-  },
   "commands": {
     "run-direct-import": {
       "suggested_key": {

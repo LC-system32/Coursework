@@ -11,6 +11,7 @@ const PopupBridge = {
   findOpenTabBySite,
   getActiveTab,
   getSourceTabForPicker,
+  getSourceTabForImport,
   getCommandShortcut,
   getImportFlowState,
   openSettingsPopup,

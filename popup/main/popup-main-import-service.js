@@ -22,21 +22,21 @@ async function handleImportButtonClick() {
       return;
     }
 
-    const activeTab = await PopupBridge.getActiveTab();
+    const sourceTab = await PopupBridge.getSourceTabForImport(currentConfig?.sourceSite);
 
-    if (!activeTab?.id || !activeTab.url) {
-      const message = "ВАЖЛИВО! Не вдалося знайти активну вкладку з сайтом-джерелом.";
+    if (!sourceTab?.id || !sourceTab.url) {
+      const message = "ВАЖЛИВО! Вкладка сайту-джерела зараз не відкрита. Відкрийте сайт-джерело з налаштувань плагіна і повторіть запуск імпорту.";
       setStatus(message);
-      showPopupToast(message, "error", 5200);
+      showPopupToast(message, "error", 6200);
       return;
     }
 
-    setStatus("Зчитуємо дані з активної вкладки і запускаємо повний імпорт...");
+    setStatus("Знайдено вкладку джерела. Зчитуємо дані і запускаємо повний імпорт...");
 
     const response = await PopupBridge.ext.runtime.sendMessage({
       type: "RUN_IMPORT_FLOW",
       config: currentConfig,
-      sourceTabId: activeTab.id
+      sourceTabId: sourceTab.id
     });
 
     if (!response?.ok) {

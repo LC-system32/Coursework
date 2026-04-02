@@ -139,6 +139,25 @@ async function resolveCommandSourceTab(commandTab) {
   return tabs[0] || null;
 }
 
+async function resolveImportSourceTab(config, sourceTabId) {
+  const normalizedSourceTabId = Number(sourceTabId || 0);
+  const configuredSourceSite = normalizeUrl(config?.sourceSite);
+
+  if (normalizedSourceTabId) {
+    try {
+      const tab = await EXT.tabs.get(normalizedSourceTabId);
+
+      if (tab?.id && typeof tab.url === "string" && matchesConfiguredSiteInBackground(tab.url, configuredSourceSite)) {
+        return tab;
+      }
+    } catch {
+      // fall through to search by configured source site
+    }
+  }
+
+  return findOpenTabByConfiguredSite(configuredSourceSite);
+}
+
 async function startImportFlow(config, sourceTabId) {
   if (await isImportFlowInProgress()) {
     const lockMessage = "ВАЖЛИВО! Попередній імпорт ще не завершено. Дочекайтеся завершення поточного імпорту.";
@@ -153,13 +172,20 @@ async function startImportFlow(config, sourceTabId) {
     return { ok: false, message: validationMessage };
   }
 
-  const normalizedSourceTabId = Number(sourceTabId || 0);
+  const resolvedSourceTab = await resolveImportSourceTab(config, sourceTabId);
+  const normalizedSourceTabId = Number(resolvedSourceTab?.id || 0);
 
   if (!normalizedSourceTabId) {
-    const errorMessage = "ВАЖЛИВО! Не вдалося визначити вкладку джерела для запуску імпорту.";
+    const errorMessage = "ВАЖЛИВО! Вкладка сайту-джерела зараз не відкрита. Відкрийте сайт-джерело з налаштувань плагіна і повторіть запуск імпорту.";
     await notifyImportStatus(errorMessage, "IMPORT_FLOW_ERROR");
     return { ok: false, message: errorMessage };
   }
+
+  await writeDebug("import-flow:source-tab-resolved", {
+    requestedSourceTabId: Number(sourceTabId || 0),
+    resolvedSourceTabId: normalizedSourceTabId,
+    url: String(resolvedSourceTab?.url || "")
+  });
 
   await setImportFlowLock({
     inProgress: true,

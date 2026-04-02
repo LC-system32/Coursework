@@ -165,6 +165,7 @@ async function startFieldPickerSession(message, sender, sendResponse) {
 }
 
 async function handlePickerSelectFieldMessage(message, sendResponse) {
+  await loadPickerSessionFromStorage();
   const phase = pickerSession.phase === "target" ? "target" : "source";
   const list = phase === "source"
     ? pickerSession.sourceFields
@@ -215,6 +216,8 @@ async function handlePickerSelectFieldMessage(message, sendResponse) {
       ? pickerSession.sourceFields
       : pickerSession.targetFields;
 
+    await savePickerSessionToStorage();
+
     sendResponse({ ok: true, count: updatedList.length });
     return true;
   }
@@ -245,11 +248,14 @@ async function handlePickerSelectFieldMessage(message, sendResponse) {
     isFileField: false
   });
 
+  await savePickerSessionToStorage();
+
   sendResponse({ ok: true, count: updatedList.length });
   return true;
 }
 
 async function handlePickerFinishPhaseMessage(message, sendResponse) {
+  await loadPickerSessionFromStorage();
   pickerSession.sourceFields = normalizeFieldOrder(pickerSession.sourceFields);
   pickerSession.targetFields = normalizeFieldOrder(pickerSession.targetFields);
 
@@ -304,6 +310,7 @@ async function handlePickerFinishPhaseMessage(message, sendResponse) {
 }
 
 async function handlePickerResolveMismatchMessage(message, sendResponse) {
+  await loadPickerSessionFromStorage();
   await writeDebug("mismatch-decision", {
     action: message.action,
     sourceCount: pickerSession.sourceFields.length,
@@ -330,6 +337,7 @@ async function handlePickerResolveMismatchMessage(message, sendResponse) {
     return true;
   }
 
+  await savePickerSessionToStorage();
   await restartPickerSession();
 
   sendResponse({ ok: true, restarted: true });
@@ -340,6 +348,8 @@ async function handleFieldPickerMessage(message, sender, sendResponse) {
   if (message.type === "FIELD_PICKER_START") {
     return startFieldPickerSession(message, sender, sendResponse);
   }
+
+  await loadPickerSessionFromStorage();
 
   if (!pickerSession) {
     sendResponse({ ok: false, reason: "no-session" });
