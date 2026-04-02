@@ -1,3 +1,29 @@
+
+async function loadPickerSessionFromStorage() {
+  if (pickerSession) {
+    return pickerSession;
+  }
+
+  const stored = await getBackgroundSessionValue(BACKGROUND_PICKER_SESSION_KEY);
+  if (!stored || typeof stored !== "object") {
+    return null;
+  }
+
+  pickerSession = {
+    sessionId: String(stored.sessionId || `picker-${Date.now()}`),
+    sourceSite: String(stored.sourceSite || ""),
+    targetSite: String(stored.targetSite || ""),
+    sourceFields: normalizeFieldOrder(stored.sourceFields),
+    targetFields: normalizeFieldOrder(stored.targetFields),
+    sourceTabId: Number(stored.sourceTabId || 0),
+    targetTabId: Number(stored.targetTabId || 0),
+    phase: stored.phase === "target" ? "target" : "source",
+    awaitingResolution: Boolean(stored.awaitingResolution)
+  };
+
+  return pickerSession;
+}
+
 function normalizeFieldOrder(list) {
   const items = Array.isArray(list)
     ? list.filter(Boolean).map((item) => ({ ...item }))
@@ -34,15 +60,25 @@ async function savePickerSessionToStorage() {
     return;
   }
 
+  const sessionSnapshot = {
+    active: true,
+    awaitingResolution: Boolean(pickerSession.awaitingResolution),
+    phase: pickerSession.phase,
+    sessionId: pickerSession.sessionId,
+    sourceSite: pickerSession.sourceSite,
+    targetSite: pickerSession.targetSite
+  };
+
   await EXT.storage.local.set({
-    [PICKER_SESSION_KEY]: {
-      active: true,
-      awaitingResolution: Boolean(pickerSession.awaitingResolution),
-      phase: pickerSession.phase,
-      sessionId: pickerSession.sessionId,
-      sourceSite: pickerSession.sourceSite,
-      targetSite: pickerSession.targetSite
-    }
+    [PICKER_SESSION_KEY]: sessionSnapshot
+  });
+
+  await setBackgroundSessionValue(BACKGROUND_PICKER_SESSION_KEY, {
+    ...sessionSnapshot,
+    sourceFields: normalizeFieldOrder(pickerSession.sourceFields),
+    targetFields: normalizeFieldOrder(pickerSession.targetFields),
+    sourceTabId: Number(pickerSession.sourceTabId || 0),
+    targetTabId: Number(pickerSession.targetTabId || 0)
   });
 
   await writeDebug("picker-session-saved", {
@@ -56,10 +92,13 @@ async function savePickerSessionToStorage() {
 
 async function clearPickerSessionFromStorage() {
   await EXT.storage.local.remove(PICKER_SESSION_KEY);
+  await removeBackgroundSessionValue(BACKGROUND_PICKER_SESSION_KEY);
   await writeDebug("picker-session-cleared");
 }
 
 async function finalizePickerSession() {
+  await loadPickerSessionFromStorage();
+
   if (!pickerSession) {
     return;
   }
@@ -88,6 +127,8 @@ async function finalizePickerSession() {
 }
 
 async function activateSourcePhase() {
+  await loadPickerSessionFromStorage();
+
   if (!pickerSession) {
     return;
   }
@@ -124,6 +165,8 @@ async function activateSourcePhase() {
 }
 
 async function activateTargetPhase() {
+  await loadPickerSessionFromStorage();
+
   if (!pickerSession) {
     return;
   }
@@ -166,6 +209,8 @@ function fieldsEqualKey(item) {
 }
 
 async function restartPickerSession() {
+  await loadPickerSessionFromStorage();
+
   if (!pickerSession) {
     return;
   }

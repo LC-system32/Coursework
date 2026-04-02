@@ -6,6 +6,8 @@ const TOAST_CONTAINER_ID = "data-import-toast-container";
 const PICKER_STYLE_ID = "data-import-picker-style";
 const PICKER_HOVER_CLASS = "data-import-picker-hover";
 const PICKER_SELECTED_CLASS = "data-import-picker-selected";
+const OVERWRITE_DIALOG_ID = "data-import-overwrite-dialog";
+const OVERWRITE_DIALOG_TIMER_MS = 75 * 1000;
 const FILE_FIELD_LABEL = "Поле для файлу";
 
 const CONTROL_SELECTOR = [

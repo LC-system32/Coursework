@@ -177,6 +177,15 @@ function insertBlankRegularField(role) {
   renderFieldList(role);
 }
 
+function removeFieldByIndex(role, index) {
+  const nextMappings = getRoleMappings(role)
+    .filter((_, itemIndex) => itemIndex !== index)
+    .map((item) => ({ ...item }));
+
+  fieldMappingsState[role] = normalizeMappingsForRole(role, nextMappings);
+  renderFieldList(role);
+}
+
 function updateMappingFromInput(role, index, value) {
   const mappings = getRoleMappings(role);
   const mapping = mappings[index] || createEmptyMapping(role, index, { isFileField: false, identifierValue: "" });

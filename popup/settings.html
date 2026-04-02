@@ -1,103 +1,18 @@
 <!doctype html>
-<html lang="uk">
+<html lang="uk" class="app-dark">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Data Import Bridge Settings</title>
-  <link rel="stylesheet" href="popup-common.css" />
-  <link rel="stylesheet" href="settings.css" />
 </head>
 
-<body class="popup-body settings-body">
-  <main class="popup-shell settings-shell">
-    <section class="panel settings-panel">
-      <header class="topbar topbar--settings">
-        <button class="icon-button icon-button--soft" id="backBtn" type="button" aria-label="Назад">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 18 9 12l6-6" />
-          </svg>
-        </button>
+<body style="margin:0; padding:22px; min-height:100vh; box-sizing:border-box; background:radial-gradient(circle at top left, rgba(129,140,248,0.24), transparent 24%), radial-gradient(circle at 85% 8%, rgba(59,130,246,0.18), transparent 20%), radial-gradient(circle at 80% 80%, rgba(16,185,129,0.12), transparent 22%), linear-gradient(180deg, #020617 0%, #0f172a 40%, #111827 100%); font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#e5eefb; overflow-x:hidden;">
+  <div id="settingsAppRoot"></div>
 
-        <div class="topbar__center">
-          <p class="brand__eyebrow">Schema editor</p>
-          <h1 class="brand__title brand__title--settings">Налаштування</h1>
-        </div>
-
-        <span class="topbar__spacer" aria-hidden="true"></span>
-      </header>
-
-      <section class="settings-screen">
-        <div class="settings-scroll">
-          <section class="settings-transfer-card" aria-label="Імпорт та експорт налаштувань">
-            <div class="settings-transfer-card__copy">
-              <h2 class="settings-transfer-card__title">Керування конфігурацією</h2>
-              <p class="settings-transfer-card__text">
-                У цьому розділі виконується налаштування схеми перенесення даних, а також імпорт і експорт конфігурації
-                плагіна. Вибір полів дозволяє встановити відповідність між полями сторінки-джерела та сторінки-приймача.
-              </p>
-            </div>
-
-            <button class="primary-button settings-transfer-card__actions-picker-card__button" id="launchFieldPickerBtn"
-              type="button">
-              Вибрати поля на сторінках
-            </button>
-
-            <div class="settings-transfer-card__actions">
-              <button class="secondary-button" id="exportSettingsBtn" type="button">Експорт JSON</button>
-              <button class="secondary-button" id="importSettingsBtn" type="button">Імпорт JSON</button>
-              <input id="importSettingsFileInput" type="file" accept="application/json,.json" hidden />
-            </div>
-          </section>
-
-          <span style="font-size: 13px; display: flex; width: fit-content; margin: 0 auto 15px;"
-            class="settings-column__badge">
-            Схема конфігурації зіставлення полів джерела та приймача
-          </span>
-
-          <section class="settings-grid" aria-label="Колонки налаштувань">
-            <article class="settings-column">
-              <header class="settings-column__head">
-                <span class="settings-column__badge">З сайту</span>
-                <label class="site-input">
-                  <span class="site-input__label">Джерело</span>
-                  <input id="sourceSiteInput" type="text" placeholder="https://source-site.ua" />
-                </label>
-              </header>
-
-              <div class="field-stack" id="sourceFieldsList"></div>
-              <button class="secondary-button field-list-action" id="addSourceFieldBtn" type="button">Додати
-                поле</button>
-            </article>
-
-            <article class="settings-column settings-column--target">
-              <header class="settings-column__head">
-                <span class="settings-column__badge">На сайт</span>
-                <label class="site-input">
-                  <span class="site-input__label">Приймач</span>
-                  <input id="targetSiteInput" type="text" placeholder="https://target-site.ua" />
-                </label>
-              </header>
-
-              <div class="field-stack" id="targetFieldsList"></div>
-              <button class="secondary-button field-list-action" id="addTargetFieldBtn" type="button">Додати
-                поле</button>
-            </article>
-          </section>
-        </div>
-
-        <p class="settings-status" id="settingsStatus" role="status" aria-live="polite">
-          Вкажіть сайти, відредагуйте список полів, імпортуйте/експортуйте конфіг або запустіть автоматичний вибір.
-        </p>
-
-        <div class="settings-actions">
-          <button class="secondary-button" id="cancelSettingsBtn" type="button">Скасувати</button>
-          <button class="primary-button primary-button--compact" id="saveSettingsBtn" type="button">Зберегти</button>
-        </div>
-      </section>
-    </section>
-  </main>
-
+  <script src="../node_modules/vue/dist/vue.runtime.global.prod.js"></script>
+  <script src="../node_modules/primevue/umd/primevue.min.js"></script>
+  <script src="../node_modules/@primeuix/themes/umd/aura.js"></script>
   <script src="common/popup-bridge-state.js"></script>
   <script src="common/popup-config-service.js"></script>
   <script src="common/popup-browser-tab-service.js"></script>

@@ -21,7 +21,11 @@
     "https://*/*"
   ],
   "background": {
+<<<<<<< HEAD
     "service_worker": "background.js"
+=======
+    "service_worker": "background-sw.js"
+>>>>>>> feat/g-vue
   },
   "action": {
     "default_title": "Data Import Bridge",

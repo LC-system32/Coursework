@@ -1,3 +1,29 @@
+function syncPickerModeSafe() {
+  syncPickerMode().catch((error) => {
+    if (
+      typeof handleInvalidatedExtensionContext === "function" &&
+      handleInvalidatedExtensionContext(error)
+    ) {
+      return;
+    }
+
+    console.error("SYNC_PICKER_MODE_SAFE_ERROR", error);
+  });
+}
+
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event?.reason;
+  if (
+    typeof isExtensionContextInvalidatedError === "function" &&
+    isExtensionContextInvalidatedError(reason)
+  ) {
+    event.preventDefault();
+    if (typeof handleInvalidatedExtensionContext === "function") {
+      handleInvalidatedExtensionContext(reason);
+    }
+  }
+});
+
 document.addEventListener("mousemove", (event) => {
   if (!pickerState.active) {
     return;
@@ -41,6 +67,7 @@ document.addEventListener("keydown", async (event) => {
 }, true);
 
 window.addEventListener("focus", () => {
+<<<<<<< HEAD
   syncPickerMode().catch((error) => {
     if (!handleInvalidatedExtensionContext(error)) {
       console.error("PICKER_MODE_SYNC_ERROR", error);
@@ -54,20 +81,36 @@ document.addEventListener("visibilitychange", () => {
       console.error("PICKER_MODE_SYNC_ERROR", error);
     }
   });
+=======
+  syncPickerModeSafe();
+});
+
+document.addEventListener("visibilitychange", () => {
+  syncPickerModeSafe();
+>>>>>>> feat/g-vue
 });
 
 ext.storage?.onChanged?.addListener((changes, areaName) => {
   if (areaName === "local" && changes[PICKER_SESSION_KEY]) {
+<<<<<<< HEAD
     syncPickerMode().catch((error) => {
       if (!handleInvalidatedExtensionContext(error)) {
         console.error("PICKER_MODE_SYNC_ERROR", error);
       }
     });
+=======
+    syncPickerModeSafe();
+>>>>>>> feat/g-vue
   }
 });
 
 ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
+    if (message?.type === "PING_CONTENT_SCRIPT") {
+      sendResponse({ ok: true, ready: true, url: window.location.href });
+      return;
+    }
+
     if (message?.type === "START_IMPORT") {
       const config = await getSyncedConfig(message.config);
       const collectResult = await collectImportPayload(config);
@@ -77,9 +120,29 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
+<<<<<<< HEAD
       const saveResult = await safeStorageLocalSet({
         [IMPORT_PAYLOAD_KEY]: collectResult.payload
       });
+=======
+      try {
+        await ext.storage.local.set({
+          [IMPORT_PAYLOAD_KEY]: collectResult.payload
+        });
+      } catch (error) {
+        if (
+          typeof handleInvalidatedExtensionContext === "function" &&
+          handleInvalidatedExtensionContext(error)
+        ) {
+          sendResponse({
+            ok: false,
+            message: "Контекст розширення було оновлено. Перезавантажте сторінку і повторіть спробу."
+          });
+          return;
+        }
+        throw error;
+      }
+>>>>>>> feat/g-vue
 
       if (saveResult?.invalidated) {
         sendResponse({
@@ -117,6 +180,17 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     sendResponse({ ok: false, reason: "unknown-message" });
   })().catch((error) => {
+    if (
+      typeof handleInvalidatedExtensionContext === "function" &&
+      handleInvalidatedExtensionContext(error)
+    ) {
+      sendResponse({
+        ok: false,
+        message: "Контекст розширення було оновлено. Перезавантажте сторінку і повторіть спробу."
+      });
+      return;
+    }
+
     console.error("CONTENT_MESSAGE_ERROR", error);
     sendResponse({ ok: false, message: String(error?.message || error) });
   });
@@ -124,8 +198,12 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+<<<<<<< HEAD
 syncPickerMode().catch((error) => {
   if (!handleInvalidatedExtensionContext(error)) {
     console.error("PICKER_MODE_SYNC_ERROR", error);
   }
 });
+=======
+syncPickerModeSafe();
+>>>>>>> feat/g-vue

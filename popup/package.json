@@ -1,0 +1,10 @@
+{
+  "name": "data-import-bridge-popup-primevue",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@primeuix/themes": "^2.0.3",
+    "primevue": "^4.5.4",
+    "vue": "^3.5.31"
+  }
+}

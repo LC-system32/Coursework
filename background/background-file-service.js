@@ -1,9 +1,9 @@
-function cleanupExpiredFileCache() {
+async function cleanupExpiredFileCache() {
   const now = Date.now();
 
   for (const [cacheKey, item] of importFileCache.entries()) {
     if (!item?.createdAt || now - item.createdAt > FILE_CACHE_TTL_MS) {
-      importFileCache.delete(cacheKey);
+      await deleteCachedImportFile(cacheKey);
     }
   }
 }
@@ -185,7 +185,7 @@ async function tryFetchBinary(url) {
 }
 
 async function downloadImportFile(fileRef) {
-  cleanupExpiredFileCache();
+  await cleanupExpiredFileCache();
 
   const normalizedRef = normalizeFileReference(fileRef);
   const sourceUrl = normalizedRef.sourceUrl;
@@ -253,7 +253,7 @@ async function downloadImportFile(fileRef) {
     ? (safeName.toLowerCase().endsWith(".pdf") ? "application/pdf" : (normalizedRef.mimeType || "application/octet-stream"))
     : (fileData.contentType || normalizedRef.mimeType || "application/pdf");
 
-  importFileCache.set(cacheKey, {
+  await setCachedImportFile(cacheKey, {
     createdAt: Date.now(),
     fileName: safeName,
     mimeType,

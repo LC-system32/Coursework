@@ -41,11 +41,30 @@ function base64ToFile(base64, fileName, mimeType) {
   });
 }
 
+async function safeSendMessageToBackground(payload) {
+  try {
+    return await ext.runtime.sendMessage(payload);
+  } catch (error) {
+    if (typeof handleInvalidatedExtensionContext === "function" && handleInvalidatedExtensionContext(error)) {
+      return { ok: false, invalidated: true };
+    }
+    throw error;
+  }
+}
+
 async function fetchFileFromBackground(fileRef) {
+<<<<<<< HEAD
   const download = await safeRuntimeSendMessage({
+=======
+  const download = await safeSendMessageToBackground({
+>>>>>>> feat/g-vue
     type: "DOWNLOAD_IMPORT_FILE",
     fileRef
   });
+
+  if (download?.invalidated) {
+    throw new Error("extension-context-invalidated");
+  }
 
   if (!download?.ok || !download.cacheKey || !download.chunkCount) {
     throw new Error(download?.message || download?.reason || "download-import-file-failed");
@@ -54,14 +73,26 @@ async function fetchFileFromBackground(fileRef) {
   let base64 = "";
 
   for (let chunkIndex = 0; chunkIndex < download.chunkCount; chunkIndex += 1) {
+<<<<<<< HEAD
     const chunkResponse = await safeRuntimeSendMessage({
+=======
+    const chunkResponse = await safeSendMessageToBackground({
+>>>>>>> feat/g-vue
       type: "GET_IMPORTED_FILE_CHUNK",
       cacheKey: download.cacheKey,
       chunkIndex
     });
 
+    if (chunkResponse?.invalidated) {
+      throw new Error("extension-context-invalidated");
+    }
+
     if (!chunkResponse?.ok) {
+<<<<<<< HEAD
       await safeRuntimeSendMessage({
+=======
+      await safeSendMessageToBackground({
+>>>>>>> feat/g-vue
         type: "CLEAR_IMPORTED_FILE_CACHE",
         cacheKey: download.cacheKey
       });
@@ -71,7 +102,11 @@ async function fetchFileFromBackground(fileRef) {
     base64 += chunkResponse.chunk || "";
   }
 
+<<<<<<< HEAD
   await safeRuntimeSendMessage({
+=======
+  await safeSendMessageToBackground({
+>>>>>>> feat/g-vue
     type: "CLEAR_IMPORTED_FILE_CACHE",
     cacheKey: download.cacheKey
   });

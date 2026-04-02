@@ -1,5 +1,5 @@
-function respondWithFileChunk(message, sendResponse) {
-  const cacheItem = importFileCache.get(String(message.cacheKey || ""));
+async function respondWithFileChunk(message, sendResponse) {
+  const cacheItem = await getCachedImportFile(String(message.cacheKey || ""));
   const chunkIndex = Number(message.chunkIndex || 0);
 
   if (!cacheItem || !cacheItem.chunks[chunkIndex]) {
@@ -73,7 +73,7 @@ async function handleImportFileMessage(message, sendResponse) {
 
   if (message.type === "CLEAR_IMPORTED_FILE_CACHE") {
     if (message.cacheKey) {
-      importFileCache.delete(String(message.cacheKey));
+      await deleteCachedImportFile(String(message.cacheKey));
     }
 
     sendResponse({ ok: true });
@@ -84,6 +84,12 @@ async function handleImportFileMessage(message, sendResponse) {
 }
 
 async function handleImportFlowMessage(message, sendResponse) {
+  if (message.type === "FORCE_FINISH_IMPORT_FLOW") {
+    await forceFinishImportFlow(String(message.reason || "external-finish"));
+    sendResponse({ ok: true });
+    return true;
+  }
+
   if (message.type === "GET_IMPORT_FLOW_STATE") {
     const inProgress = await isImportFlowInProgress();
     const lock = inProgress ? (await readImportFlowLock()) || activeImportFlow : null;
@@ -107,7 +113,7 @@ async function handleImportFlowMessage(message, sendResponse) {
 }
 
 async function handleRuntimeMessageDispatch(message, sender, sendResponse) {
-  cleanupExpiredFileCache();
+  await cleanupExpiredFileCache();
 
   if (!message || typeof message !== "object") {
     sendResponse({ ok: false, reason: "bad-message" });
