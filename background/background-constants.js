@@ -10,9 +10,20 @@ const FILE_FIELD_LABEL = "Поле для файлу";
 const POPUP_CONFIG_STORAGE_KEY = "data-import-popup-config";
 const QUICK_IMPORT_COMMAND_NAME = "run-direct-import";
 const IMPORT_FLOW_LOCK_KEY = "data-import-active-import-flow";
-const IMPORT_FLOW_LOCK_TTL_MS = 15 * 60 * 1000;
+const IMPORT_FLOW_LOCK_TTL_MS = 3 * 60 * 1000;
 
 let pickerSession = null;
 const importFileCache = new Map();
 
 let activeImportFlow = null;
+
+const CONTENT_SCRIPT_FILES = [
+  "content/content-constants.js",
+  "content/content-toast-service.js",
+  "content/content-picker-dom-service.js",
+  "content/content-picker-session-service.js",
+  "content/content-form-io-service.js",
+  "content/content-file-transfer-service.js",
+  "content/content-import-flow-service.js",
+  "content/content.js"
+];

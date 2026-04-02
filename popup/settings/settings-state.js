@@ -49,6 +49,26 @@ const settingsStatusEl = {
   }
 };
 
+function focusPrimeInputElement(element) {
+  if (!element) {
+    return;
+  }
+
+  if (typeof element.focus === "function") {
+    element.focus();
+    return;
+  }
+
+  const domNode = element.$el || element;
+
+  if (typeof domNode?.focus === "function") {
+    domNode.focus();
+    return;
+  }
+
+  domNode?.querySelector?.("input")?.focus?.();
+}
+
 const sourceSiteInput = {
   get value() {
     return settingsUiState.sourceSite;
@@ -57,7 +77,7 @@ const sourceSiteInput = {
     settingsUiState.sourceSite = String(value || "");
   },
   focus() {
-    sourceSiteInputElement?.focus?.();
+    focusPrimeInputElement(sourceSiteInputElement);
   }
 };
 

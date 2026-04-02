@@ -215,6 +215,79 @@ async function waitForPostUploadFieldsReady(entries, timeoutMs = 15000) {
   return entries.map((entry) => findElementByEntry(entry));
 }
 
+function hasExistingControlValue(value) {
+  return Boolean(normalizeWhitespace(value || ""));
+}
+
+
+async function signalImportFlowFinishedEarly(reason) {
+  try {
+    await ext.runtime.sendMessage({
+      type: "FORCE_FINISH_IMPORT_FLOW",
+      reason: String(reason || "content-finish")
+    });
+  } catch {
+    // background may already be unavailable
+  }
+}
+
+function collectOverwriteConflicts(entries, values, elements) {
+  const safeEntries = Array.isArray(entries) ? entries : [];
+  const safeValues = Array.isArray(values) ? values : [];
+  const safeElements = Array.isArray(elements) ? elements : [];
+
+  return safeEntries
+    .map((entry, index) => {
+      const element = safeElements[index];
+      if (!element) {
+        return null;
+      }
+
+      const currentValue = readCurrentControlValue(element);
+      if (!hasExistingControlValue(currentValue)) {
+        return null;
+      }
+
+      const nextValue = String(safeValues[index]?.value || "");
+      return {
+        label: entry?.identifierValue || entry?.label || `Поле ${index + 1}`,
+        currentValue,
+        nextValue
+      };
+    })
+    .filter(Boolean);
+}
+
+async function confirmOverwriteIfNeeded(entries, values, elements) {
+  const conflicts = collectOverwriteConflicts(entries, values, elements);
+
+  if (!conflicts.length) {
+    return { ok: true, confirmed: false };
+  }
+
+  const decision = await showOverwriteConfirmationDialog(conflicts, {
+    timeoutMs: OVERWRITE_DIALOG_TIMER_MS
+  });
+
+  if (decision === "overwrite") {
+    return { ok: true, confirmed: true };
+  }
+
+  if (decision === "timeout") {
+    await signalImportFlowFinishedEarly("overwrite-timeout");
+    return {
+      ok: false,
+      message: "Час очікування підтвердження перезапису вичерпано. Імпорт значень у поля зупинено без зміни поточних значень."
+    };
+  }
+
+  await signalImportFlowFinishedEarly("overwrite-cancel");
+  return {
+    ok: false,
+    message: "Імпорт значень у поля скасовано користувачем. Поточні значення у формі не змінено."
+  };
+}
+
 async function fillRegularTargetFields(entries, values, preResolvedElements = null) {
   const elements = Array.isArray(preResolvedElements) && preResolvedElements.length === entries.length
     ? preResolvedElements
@@ -271,6 +344,8 @@ async function applyImportPayload(configFromMessage, payloadFromMessage) {
 
   const { regularEntries, fileEntry } = splitMappedEntries(targetSelectors);
   let fileUploaded = false;
+  let readyRegularElements = [];
+  let overwriteAlreadyConfirmed = false;
 
   const pageReady = await waitForTargetPageReady(
     fileEntry,
@@ -283,6 +358,27 @@ async function applyImportPayload(configFromMessage, payloadFromMessage) {
       ok: false,
       message: "ВАЖЛИВО! Сторінка-приймач ще не завершила повне завантаження або потрібні поля ще не з'явилися."
     };
+  }
+
+  if (regularEntries.length) {
+    readyRegularElements = await waitForRegularTargetElements(
+      regularEntries,
+      payload.fileRef ? 2500 : 8000
+    );
+
+    if (readyRegularElements.length && readyRegularElements.every(Boolean)) {
+      const overwriteDecision = await confirmOverwriteIfNeeded(
+        regularEntries,
+        payload.values || [],
+        readyRegularElements
+      );
+
+      if (!overwriteDecision.ok) {
+        return overwriteDecision;
+      }
+
+      overwriteAlreadyConfirmed = overwriteDecision.confirmed;
+    }
   }
 
   if (payload.fileRef) {
@@ -328,10 +424,11 @@ async function applyImportPayload(configFromMessage, payloadFromMessage) {
     await waitForDocumentReady(12000);
   }
 
-
-  const readyRegularElements = payload.fileRef
-    ? await waitForPostUploadFieldsReady(regularEntries, 45000)
-    : await waitForRegularTargetElements(regularEntries, 8000);
+  if (payload.fileRef) {
+    readyRegularElements = await waitForPostUploadFieldsReady(regularEntries, 45000);
+  } else if (!readyRegularElements.length) {
+    readyRegularElements = await waitForRegularTargetElements(regularEntries, 8000);
+  }
 
   if (!regularEntries.length) {
     return {
@@ -340,6 +437,18 @@ async function applyImportPayload(configFromMessage, payloadFromMessage) {
       fileUploaded,
       message: "Імпорт завершено. Файл успішно передано у форму."
     };
+  }
+
+  if (!overwriteAlreadyConfirmed) {
+    const overwriteDecision = await confirmOverwriteIfNeeded(
+      regularEntries,
+      payload.values || [],
+      readyRegularElements
+    );
+
+    if (!overwriteDecision.ok) {
+      return overwriteDecision;
+    }
   }
 
   const fillResult = await fillRegularTargetFields(regularEntries, payload.values || [], readyRegularElements);

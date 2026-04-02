@@ -41,6 +41,130 @@ async function notifyExtension(message) {
   }
 }
 
+
+async function pingContentReceiver(tabId) {
+  try {
+    await EXT.tabs.sendMessage(tabId, {
+      type: "PING_CONTENT_SCRIPT"
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isInjectableTabUrl(tabUrl) {
+  try {
+    const url = new URL(tabUrl);
+    return /^https?:$/i.test(url.protocol);
+  } catch {
+    return false;
+  }
+}
+
+async function ensureTabHostPermission(tabId, context = "unknown") {
+  const tab = await EXT.tabs.get(tabId);
+  const tabUrl = String(tab?.url || "");
+
+  if (!isInjectableTabUrl(tabUrl)) {
+    await writeDebug("host-permission:unsupported-url", {
+      tabId,
+      context,
+      url: tabUrl
+    });
+    return false;
+  }
+
+  await writeDebug("host-permission:manifest-assumed", {
+    tabId,
+    context,
+    url: tabUrl
+  });
+
+  return true;
+}
+
+async function injectContentScripts(tabId) {
+  if (!EXT.scripting?.executeScript) {
+    return false;
+  }
+
+  await EXT.scripting.executeScript({
+    target: { tabId },
+    files: CONTENT_SCRIPT_FILES
+  });
+
+  return true;
+}
+
+async function ensureContentReceiver(tabId, context = "unknown") {
+  const normalizedTabId = Number(tabId || 0);
+
+  if (!normalizedTabId) {
+    return false;
+  }
+
+  if (await pingContentReceiver(normalizedTabId)) {
+    await writeDebug("receiver-ready", {
+      tabId: normalizedTabId,
+      context,
+      strategy: "ping"
+    });
+    return true;
+  }
+
+  await writeDebug("ensure-injected:start", {
+    tabId: normalizedTabId,
+    context
+  });
+
+  const permissionReady = await ensureTabHostPermission(normalizedTabId, context);
+
+  if (!permissionReady) {
+    await writeDebug("ensure-injected:permission-denied", {
+      tabId: normalizedTabId,
+      context
+    });
+    return false;
+  }
+
+  try {
+    const injected = await injectContentScripts(normalizedTabId);
+
+    await writeDebug("ensure-injected:script-executed", {
+      tabId: normalizedTabId,
+      context,
+      injected
+    });
+  } catch (error) {
+    await writeDebug("ensure-injected:script-failed", {
+      tabId: normalizedTabId,
+      context,
+      error: String(error?.message || error)
+    });
+
+    return false;
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 180));
+
+  if (await pingContentReceiver(normalizedTabId)) {
+    await writeDebug("ensure-injected:ping-after-ok", {
+      tabId: normalizedTabId,
+      context
+    });
+    return true;
+  }
+
+  await writeDebug("ensure-injected:ping-after-failed", {
+    tabId: normalizedTabId,
+    context
+  });
+
+  return false;
+}
+
 async function waitForTabReady(tabId) {
   const tab = await EXT.tabs.get(tabId);
 

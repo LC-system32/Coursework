@@ -36,6 +36,16 @@ async function clearImportFlowLock() {
   await EXT.storage.local.remove(IMPORT_FLOW_LOCK_KEY);
 }
 
+
+async function forceFinishImportFlow(reason = "external-finish") {
+  await writeDebug("import-flow:force-finish", {
+    reason,
+    sourceTabId: Number(activeImportFlow?.sourceTabId || 0)
+  });
+
+  await clearImportFlowLock();
+}
+
 function normalizeImportSiteForCompare(value) {
   const raw = normalizeUrl(value);
 
@@ -161,6 +171,11 @@ async function startImportFlow(config, sourceTabId) {
     try {
       await notifyImportStatus("Зчитуємо дані з полів на сайті-джерелі...");
 
+      const sourceReady = await ensureContentReceiver(normalizedSourceTabId, "source-import");
+      if (!sourceReady) {
+        throw new Error("Не вдалося підготувати вкладку джерела до автоматичного імпорту.");
+      }
+
       const collectResponse = await EXT.tabs.sendMessage(normalizedSourceTabId, {
         type: "COLLECT_IMPORT_PAYLOAD",
         config
@@ -180,6 +195,12 @@ async function startImportFlow(config, sourceTabId) {
       const targetTab = await prepareTargetTab(config.targetSite);
 
       await notifyImportStatus("Сайт-приймач відкрито. Заповнюємо форму і завантажуємо файл...");
+
+      const targetReady = await ensureContentReceiver(targetTab.id, "target-import");
+      if (!targetReady) {
+        throw new Error("Не вдалося підготувати вкладку приймача до автоматичного імпорту.");
+      }
+
       const applyResponse = await EXT.tabs.sendMessage(targetTab.id, {
         type: "APPLY_IMPORT_PAYLOAD",
         config,

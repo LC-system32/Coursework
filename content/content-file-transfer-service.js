@@ -259,7 +259,6 @@ function attachFileToInput(input, file) {
 
   try {
     input.focus();
-    input.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
   } catch { }
 
   try {
@@ -509,10 +508,6 @@ async function uploadImportedFileToTarget(targetElement, file) {
 
     const dropCandidates = getDropZoneCandidates(currentTarget || document.body);
     for (const dropCandidate of dropCandidates) {
-      try {
-        dropCandidate.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-      } catch { }
-
       const dropped = dispatchDropWithFile(dropCandidate, file);
       if (!dropped) {
         continue;

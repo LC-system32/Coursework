@@ -84,6 +84,12 @@ async function handleImportFileMessage(message, sendResponse) {
 }
 
 async function handleImportFlowMessage(message, sendResponse) {
+  if (message.type === "FORCE_FINISH_IMPORT_FLOW") {
+    await forceFinishImportFlow(String(message.reason || "external-finish"));
+    sendResponse({ ok: true });
+    return true;
+  }
+
   if (message.type === "GET_IMPORT_FLOW_STATE") {
     const inProgress = await isImportFlowInProgress();
     const lock = inProgress ? (await readImportFlowLock()) || activeImportFlow : null;

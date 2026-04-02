@@ -56,6 +56,11 @@ ext.storage?.onChanged?.addListener((changes, areaName) => {
 
 ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
+    if (message?.type === "PING_CONTENT_SCRIPT") {
+      sendResponse({ ok: true, ready: true, url: window.location.href });
+      return;
+    }
+
     if (message?.type === "START_IMPORT") {
       const config = await getSyncedConfig(message.config);
       const collectResult = await collectImportPayload(config);
