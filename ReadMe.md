@@ -1,6 +1,6 @@
 <p align="center">
   <a href="#">
-    <img src="favicon.svg" alt="Data Import Bridge" width="180">
+    <img src="icons/icon128.png" alt="Data Import Bridge" width="180">
 <h1 align="center">Data Import Bridge</h1>
   </a>
 </p>
