@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Data Import Bridge",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Імпортування даних між системою верифікації робіт та StrikePlagiarism через popup-вікно налаштувань.",
   "homepage_url": "https://fotius.cdu.edu.ua/",
   "icons": {
