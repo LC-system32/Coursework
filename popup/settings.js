@@ -569,14 +569,12 @@ createApp({
     getDisplayValue(mapping, index) {
       return getMappingDisplayValue(mapping, index);
     },
-
+    
     handleSiteInput(role, value) {
       if (role === "source") {
-        if (globalThis.sourceSiteInput) {
-          globalThis.sourceSiteInput.value = value;
-        }
-      } else if (globalThis.targetSiteInput) {
-        globalThis.targetSiteInput.value = value;
+        sourceSiteInput.value = value;
+      } else {
+        targetSiteInput.value = value;
       }
 
       scheduleAutoSave();
