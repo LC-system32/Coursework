@@ -7,7 +7,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-beta-blue" alt="Status">
-  <img src="https://img.shields.io/badge/version-v2.0-green" alt="Version">
+  <img src="https://img.shields.io/badge/version-v2.0.1-green" alt="Version">
   <img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000" alt="License">
 </p>
 
