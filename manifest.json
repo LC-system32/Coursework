@@ -21,7 +21,7 @@
     "https://*/*"
   ],
   "background": {
-    "service_worker": "background-sw.js"
+    "service_worker": "background.js"
   },
   "action": {
     "default_title": "Data Import Bridge",

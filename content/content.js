@@ -67,40 +67,16 @@ document.addEventListener("keydown", async (event) => {
 }, true);
 
 window.addEventListener("focus", () => {
-<<<<<<< HEAD
-  syncPickerMode().catch((error) => {
-    if (!handleInvalidatedExtensionContext(error)) {
-      console.error("PICKER_MODE_SYNC_ERROR", error);
-    }
-  });
-});
-
-document.addEventListener("visibilitychange", () => {
-  syncPickerMode().catch((error) => {
-    if (!handleInvalidatedExtensionContext(error)) {
-      console.error("PICKER_MODE_SYNC_ERROR", error);
-    }
-  });
-=======
   syncPickerModeSafe();
 });
 
 document.addEventListener("visibilitychange", () => {
   syncPickerModeSafe();
->>>>>>> feat/g-vue
 });
 
 ext.storage?.onChanged?.addListener((changes, areaName) => {
   if (areaName === "local" && changes[PICKER_SESSION_KEY]) {
-<<<<<<< HEAD
-    syncPickerMode().catch((error) => {
-      if (!handleInvalidatedExtensionContext(error)) {
-        console.error("PICKER_MODE_SYNC_ERROR", error);
-      }
-    });
-=======
     syncPickerModeSafe();
->>>>>>> feat/g-vue
   }
 });
 
@@ -120,11 +96,6 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-<<<<<<< HEAD
-      const saveResult = await safeStorageLocalSet({
-        [IMPORT_PAYLOAD_KEY]: collectResult.payload
-      });
-=======
       try {
         await ext.storage.local.set({
           [IMPORT_PAYLOAD_KEY]: collectResult.payload
@@ -142,7 +113,6 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
         throw error;
       }
->>>>>>> feat/g-vue
 
       if (saveResult?.invalidated) {
         sendResponse({
@@ -198,12 +168,4 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-<<<<<<< HEAD
-syncPickerMode().catch((error) => {
-  if (!handleInvalidatedExtensionContext(error)) {
-    console.error("PICKER_MODE_SYNC_ERROR", error);
-  }
-});
-=======
 syncPickerModeSafe();
->>>>>>> feat/g-vue

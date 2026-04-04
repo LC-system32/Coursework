@@ -18,9 +18,6 @@ function handleInvalidatedExtensionContext(error) {
 }
 
 async function getStoredValue(key) {
-<<<<<<< HEAD
-  return await safeStorageLocalGet(key, null);
-=======
   try {
     const data = await ext.storage.local.get(key);
     return data?.[key];
@@ -30,7 +27,6 @@ async function getStoredValue(key) {
     }
     throw error;
   }
->>>>>>> feat/g-vue
 }
 
 async function getPickerSession() {
@@ -67,14 +63,6 @@ async function syncPickerMode() {
   try {
     const session = await getPickerSession();
 
-<<<<<<< HEAD
-  if (extensionContextInvalidated) {
-    disablePickerMode();
-    return;
-  }
-
-  if (!session?.active || session.awaitingResolution || document.hidden) {
-=======
     if (!session?.active || session.awaitingResolution || document.hidden) {
       disablePickerMode();
       return;
@@ -93,7 +81,6 @@ async function syncPickerMode() {
     }
 
     console.error("SYNC_PICKER_MODE_ERROR", error);
->>>>>>> feat/g-vue
     disablePickerMode();
   }
 }
@@ -118,11 +105,7 @@ async function selectField(candidate) {
   }
 
   try {
-<<<<<<< HEAD
-    const response = await safeRuntimeSendMessage({
-=======
     const response = await safeSendRuntimeMessage({
->>>>>>> feat/g-vue
       type: "PICKER_SELECT_FIELD",
       entry,
       pageUrl: location.href
@@ -155,11 +138,7 @@ async function selectField(candidate) {
 
 async function finishPickerPhase() {
   try {
-<<<<<<< HEAD
-    const response = await safeRuntimeSendMessage({
-=======
     const response = await safeSendRuntimeMessage({
->>>>>>> feat/g-vue
       type: "PICKER_FINISH_PHASE",
       pageUrl: location.href
     });
@@ -190,11 +169,7 @@ async function finishPickerPhase() {
         "Натисніть OK, щоб обрізати зайві поля, або Скасувати, щоб почати вибір спочатку."
       );
 
-<<<<<<< HEAD
-      const resolution = await safeRuntimeSendMessage({
-=======
       const resolution = await safeSendRuntimeMessage({
->>>>>>> feat/g-vue
         type: "PICKER_RESOLVE_MISMATCH",
         action: trimExtra ? "trim" : "restart"
       });
@@ -223,17 +198,12 @@ async function finishPickerPhase() {
       return;
     }
 
-<<<<<<< HEAD
-    showToast(response?.error || response?.message || "Етап вибору не вдалося завершити.", "error");
-  } catch {
-=======
     showToast(response?.error || "Етап вибору не вдалося завершити.", "error");
   } catch (error) {
     if (handleInvalidatedExtensionContext(error)) {
       return;
     }
 
->>>>>>> feat/g-vue
     showToast("Помилка під час завершення поточного етапу вибору.", "error");
   }
 }

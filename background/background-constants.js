@@ -1,4 +1,4 @@
-const EXT = globalThis.browser ?? globalThis.chrome;
+const EXT = chrome;
 
 const FIELD_PICKER_RESULT_KEY = "data-import-field-picker-result";
 const FIELD_PICKER_DEBUG_KEY = "data-import-field-picker-debug-log";

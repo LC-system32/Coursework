@@ -1,13 +1,13 @@
 importScripts(
-  "background/background-constants.js",
-  "background/background-debug-service.js",
-  "background/background-tab-service.js",
-  "background/background-picker-session-service.js",
-  "background/background-file-service.js",
-  "background/background-import-flow-service.js",
-  "background/background-picker-message-service.js",
-  "background/background-message-router-service.js",
-  "background/background-command-service.js"
+  'background/background-constants.js',
+  'background/background-debug-service.js',
+  'background/background-tab-service.js',
+  'background/background-picker-session-service.js',
+  'background/background-file-service.js',
+  'background/background-import-flow-service.js',
+  'background/background-picker-message-service.js',
+  'background/background-message-router-service.js',
+  'background/background-command-service.js',
 );
 
 EXT.runtime.onMessage.addListener(handleRuntimeMessage);

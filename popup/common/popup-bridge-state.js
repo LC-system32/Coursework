@@ -1,4 +1,4 @@
-const ext = globalThis.browser ?? globalThis.chrome;
+const ext = chrome;
 const STORAGE_KEY = "data-import-popup-config";
 const FLASH_KEY = "data-import-popup-flash";
 const SETTINGS_WINDOW_KEY = "data-import-settings-window-id";
