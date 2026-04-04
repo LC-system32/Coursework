@@ -1,4 +1,4 @@
-const ext = globalThis.browser ?? globalThis.chrome;
+const ext = chrome;
 const CONFIG_KEY = "data-import-popup-config";
 const PICKER_SESSION_KEY = "pickerSession";
 const IMPORT_PAYLOAD_KEY = "data-import-payload";
