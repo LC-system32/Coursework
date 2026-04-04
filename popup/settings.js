@@ -579,7 +579,6 @@ createApp({
 
       scheduleAutoSave();
     },
-
     handleMappingInput(role, index, value) {
       updateMappingFromInput(role, index, value);
       renderFieldList(role);
